@@ -12,20 +12,20 @@
 - **标注状态边框**：绿=已标注（区域+属性）/ 黄=仅画框 / 蓝=选中 / 无框=空白，打开自动定位最后已标注
 - **导出**：CSV / COCO / YOLO 等标注格式
 
-## Docker 一键部署
+## Docker 一键部署（docker compose）
 
 ```bash
-docker build -t via-cn .
-docker run -d -p 8602:8602 --name via-cn via-cn
+docker compose build
+docker compose up -d
 ```
 
-浏览器打开 `http://localhost:8602/`。
+浏览器打开 `http://localhost:8000/`。
 
-自定义端口：
-```bash
-docker run -d -p 8080:8602 --name via-cn via-cn
-# 访问 http://localhost:8080/
-```
+> 宿主机端口 8000 → 容器 8602。`docker-compose.yml` 默认绑定 `0.0.0.0`，**局域网内其他机器**可通过 `http://<宿主机IP>:8000/` 访问（需确保宿主机防火墙放行 8000）。
+
+自定义端口：修改 `docker-compose.yml` 的 `ports` 映射即可，如 `"8080:8602"` 后访问 `http://localhost:8080/`。
+
+停止服务：`docker compose down`
 
 ## 直接使用（无需 Docker）
 
@@ -46,6 +46,7 @@ python3 -m http.server 8602
 ├── js/     # 28 个 _via_*.js 模块
 ├── css/    # 4 个 annotator css
 ├── Dockerfile
+├── docker-compose.yml
 └── LICENSE
 ```
 

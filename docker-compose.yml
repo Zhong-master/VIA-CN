@@ -1,0 +1,8 @@
+services:
+  via-cn:
+    build: .
+    image: via-cn:latest
+    container_name: via-cn
+    ports:
+      - "8000:8602"
+    restart: unless-stopped
