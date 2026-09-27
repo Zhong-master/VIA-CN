@@ -1,2 +1,7 @@
 # SDD 工作区
 .superpowers/
+
+# npm
+node_modules/
+*.tgz
+npm-debug.log*

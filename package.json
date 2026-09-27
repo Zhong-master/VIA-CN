@@ -1,0 +1,51 @@
+{
+  "name": "via-cn",
+  "version": "3.0.13",
+  "description": "VGG Image Annotator (VIA) 3.0.13 的非官方中文版：图片 / 视频 / 音频 / 成对比较标注工具，纯静态、零依赖",
+  "keywords": [
+    "via",
+    "vgg",
+    "image-annotator",
+    "annotation",
+    "labeling",
+    "coco",
+    "yolo",
+    "中文",
+    "标注"
+  ],
+  "license": "BSD-2-Clause",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zhong-master/VIA-CN.git"
+  },
+  "homepage": "https://github.com/Zhong-master/VIA-CN#readme",
+  "bugs": {
+    "url": "https://github.com/Zhong-master/VIA-CN/issues"
+  },
+  "main": "index.js",
+  "bin": {
+    "via-cn": "bin/serve.js"
+  },
+  "files": [
+    "index.js",
+    "bin/",
+    "index.html",
+    "via_image.html",
+    "via_video.html",
+    "via_audio.html",
+    "via_pair.html",
+    "js/",
+    "css/",
+    "favicon.svg"
+  ],
+  "engines": {
+    "node": ">=16"
+  },
+  "scripts": {
+    "start": "node bin/serve.js",
+    "pack:check": "npm pack --dry-run"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

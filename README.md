@@ -42,6 +42,38 @@ python3 -m http.server 8602
 然后访问 `http://localhost:8602/`。请勿直接双击 `file://` 打开 HTML，也不要部署到子路径
 （`python3 -m http.server` 需在**本目录内**启动，或让 Web 服务器把本目录映射为站点根目录）。
 
+## 作为 npm 包使用
+
+本包已发布为 `via-cn`，自带零依赖的本地静态服务器：
+
+```bash
+npx via-cn                 # 默认 http://127.0.0.1:8602/
+npx via-cn -p 9000         # 指定端口；端口被占用时自动 +1 重试
+npx via-cn --host 0.0.0.0  # 允许局域网内其他机器访问
+```
+
+也可以装进项目，交给自己的构建工具托管静态资源：
+
+```bash
+npm i via-cn
+```
+
+```js
+const via = require('via-cn');
+console.log(via.dir);           // 包根目录（HTML / js / css 所在目录）
+console.log(via.entries.image); // .../via_image.html
+```
+
+或直接用 CDN 打开（无需安装）：
+
+```
+https://unpkg.com/via-cn@3.0.13/via_image.html
+```
+
+> 注意：本包的 `js/` 是供 `<script>` 标签全局加载的脚本，**没有** ESM/CJS 导出，
+> 因此不能 `import { ... } from 'via-cn'`，只适合当作静态资源使用。
+> 另外 localStorage 按**源**隔离，用 CDN 域名打开时数据存在该 CDN 源下。
+
 ## 数据说明
 
 - 标注数据自动保存在**浏览器 localStorage**，并按标注器类型分别存储
@@ -61,6 +93,9 @@ python3 -m http.server 8602
 ├── via_pair.html         # 成对比较
 ├── js/                   # _via_*.js 模块
 ├── css/                  # 4 个 annotator css
+├── bin/serve.js          # npx via-cn 的零依赖静态服务器
+├── index.js              # npm 入口（导出资源目录路径）
+├── package.json          # npm 包定义（files 白名单）
 ├── Dockerfile
 ├── docker-compose.yml
 └── LICENSE
