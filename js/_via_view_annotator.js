@@ -16,7 +16,7 @@ const _VIA_VIEW_MODE = {'UNKNOWN':0,
                        };
 const _VIA_PAGE = {
   'ABOUT':'page_about',
-  'SHORTCUT':'page_shortcut',
+  'SHORTCUT':'page_keyboard_shortcut',
   'START_INFO':'page_start_info',
 };
 

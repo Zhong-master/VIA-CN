@@ -46,9 +46,9 @@
     javascript code below.
       -->
 
-    <link rel="stylesheet" type="text/css" href="../css/via_image_annotator.css?v=3">
-    <script src="../js/_via_util.js"></script>
-    <script src="../js/_via_progress.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/via_image_annotator.css?v=3">
+    <script src="js/_via_util.js"></script>
+    <script src="js/_via_progress.js"></script>
   </head>
 
   <body onresize="via._hook_on_browser_resize()">
@@ -254,7 +254,6 @@
           <li>选择导出格式：
             <select id="via_page_export_format">
               <option value="via3_csv">VIA3 (CSV)</option>
-              <option value="temporal_segments_csv">仅时间片段 (CSV)</option>
               <option value="coco">COCO</option>
               <option value="yolo">YOLO 格式 (JSON)</option>
             </select>
@@ -262,7 +261,7 @@
         </ul>
         <h2>导入</h2>
         <ul>
-          <li>VIA 共享项目： <input id="via_page_import_pid" type="text" placeholder="e.g. 71578187-3cd3-45d0-8198-7c441fbc06af" style="width:25em;">
+          <li>VIA 共享项目： <input id="via_page_import_pid" type="text" placeholder="例如：71578187-3cd3-45d0-8198-7c441fbc06af" style="width:25em;">
           </li>
           <li>VIA2 项目文件（json）：
             <input id="via_page_import_via2_project_json" type="file">
@@ -272,45 +271,71 @@
         <div class="controls">
           <button id="via_page_button_import" onclick="_via_util_page_process_action(event)">导入</button>
           <button id="via_page_button_export" onclick="_via_util_page_process_action(event)">导出</button>
+          <button onclick="via._local_store_clear()" title="清除浏览器中自动保存的标注数据">清除本地自动保存</button>
           <button onclick="_via_util_page_hide()">取消</button>
         </div>
       </div>
 
       <div data-pageid="page_fileuri_bulk_add" class="via_page">
         <div class="toolbar"><span onclick="_via_util_page_hide()" class="text_button">&times;</span></div>
-        <p>文件类型:&nbsp;<select id="via_page_fileuri_filetype">
-          <option value="2" selected>Image</option>
-          <option value="4">Video</option>
-          <option value="8">Audio</option>
-          <option value="0">Detect Automatically</option>
+        <p>文件类型：&nbsp;<select id="via_page_fileuri_filetype">
+          <option value="2" selected>图片</option>
+          <option value="4">视频</option>
+          <option value="8">音频</option>
+          <option value="0">自动检测</option>
           </select>
         </p>
-        <h2>Paste 文件 URI (one URI per line)</h2>
-        <textarea id="via_page_fileuri_urilist" placeholder="For example, (1) http://www.robots.ox.ac.uk/~vgg/software/via/images/via_logo.png ; (2) file:///data/images/img001.jpg ; (3) file:///C:/Documents%20and%20Settings/tlm/video001.mp4" rows="10" cols="80"></textarea>
-        <h2>Import URI from a File</h2>
+        <h2>粘贴文件 URI（每行一个）</h2>
+        <textarea id="via_page_fileuri_urilist" placeholder="例如：(1) http://www.robots.ox.ac.uk/~vgg/software/via/images/via_logo.png ；(2) file:///data/images/img001.jpg ；(3) file:///C:/Documents%20and%20Settings/tlm/video001.mp4" rows="10" cols="80"></textarea>
+        <h2>从文件导入 URI 列表</h2>
         <input id="via_page_fileuri_importfile" type="file">
 
         <div class="controls">
-          <button id="via_page_fileuri_button_bulk_add" onclick="_via_util_page_process_action(event)">Add</button>
-          <button onclick="_via_util_page_hide()">取消</button>
-        </div>
-      </div>
-
-      <div data-pageid="page_demo_instructions" class="via_page">
-        </p>
-
-        <div class="controls">
+          <button id="via_page_fileuri_button_bulk_add" onclick="_via_util_page_process_action(event)">添加</button>
           <button onclick="_via_util_page_hide()">取消</button>
         </div>
       </div>
 
       <div data-pageid="page_demo_instructions" class="via_page">
         <div class="toolbar"><span onclick="_via_util_page_hide()" class="text_button">&times;</span></div>
-        <h1>Some Quick Tips</h1>
+        <h1>快速提示</h1>
         <ul>
-          <li>Click and drag mouse cursor to define a region around an object.</li>
-          <li>Use the <span class="text_button" onclick="via.editor.show()">attribute editor</span> to define or update attributes (e.g. name, colour, etc) of user defined regions.</li>
+          <li>按住鼠标左键拖拽，即可在目标物体周围绘制区域。</li>
+          <li>先在左下角选择类别，再绘制区域，新区域会自动归入该类别。</li>
+          <li>使用 <span class="text_button" onclick="via.editor.show()">属性编辑器</span> 创建和管理类别，并可修改当前文件中已有区域的类别。</li>
+          <li>按 <span class="text_button" onclick="_via_util_page_show('page_keyboard_shortcut')">键盘快捷键</span> 查看全部快捷键。</li>
         </ul>
+      </div>
+
+      <div data-pageid="page_about" class="via_page">
+        <div class="toolbar"><span onclick="_via_util_page_hide()" class="text_button">&times;</span></div>
+        <h1>关于 VIA-CN</h1>
+        <p>本工具基于 <a href="https://github.com/ox-vgg/via" target="_blank">VGG Image Annotator (VIA)</a> 版本 __VIA_VERSION__ 进行汉化与优化。</p>
+        <p>原版权归 Abhishek Dutta / Visual Geometry Group, Oxford University 所有，遵循 BSD-2-Clause 许可。</p>
+        <p>支持图片、视频、音频与成对比较标注；结果可导出为 CSV / COCO / YOLO / WebVTT 等格式。</p>
+        <p>标注数据默认保存在浏览器本地（localStorage），换设备请导出 JSON 后再导入。</p>
+      </div>
+
+      <div data-pageid="page_keyboard_shortcut" class="via_page">
+        <div class="toolbar"><span onclick="_via_util_page_hide()" class="text_button">&times;</span></div>
+        <h1>键盘快捷键</h1>
+        <table>
+          <thead>
+            <tr><th>操作</th><th>快捷键</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>下一个 / 上一个文件</td><td><span class="key">d</span> / <span class="key">a</span></td></tr>
+            <tr><td>适应屏幕</td><td><span class="key">r</span></td></tr>
+            <tr><td>拖拽平移</td><td><span class="key">w</span></td></tr>
+            <tr><td>选择绘制形状（矩形→点）</td><td><span class="key">1</span> - <span class="key">9</span></td></tr>
+            <tr><td>删除选中的图形</td><td><span class="key">Delete</span></td></tr>
+            <tr><td>移除当前文件</td><td><span class="key">Backspace</span></td></tr>
+            <tr><td>播放 / 暂停音频或视频</td><td><span class="key">空格</span></td></tr>
+            <tr><td>提高 / 降低播放速度</td><td><span class="key">+</span> / <span class="key">-</span></td></tr>
+            <tr><td>静音开关</td><td><span class="key">m</span></td></tr>
+            <tr><td>以鼠标位置为中心缩放图片</td><td>鼠标滚轮</td></tr>
+          </tbody>
+        </table>
       </div>
 
 
@@ -323,37 +348,38 @@
         <li>随时按 <span class="key">空格</span> 键播放或暂停音频或视频。</li>
         <li>当视频暂停时，可以为图片和视频帧定义空间区域（例如 50x80 像素的矩形边界框）。也可以为音频和视频文件定义时间片段（例如从 3.1 秒到 12.5 秒的视频片段）。</li>
         <li>使用 <span class="text_button" onclick="via.editor.show()">属性编辑器</span> 定义或更新用户区域的属性（例如名称、颜色等）。</li>
-        <li>你也可以尝试预加载的 <a target="_blank" href="http://www.robots.ox.ac.uk/~vgg/software/via/demo/via_image_annotator.html">图片</a>、<a target="_blank" href="http://www.robots.ox.ac.uk/~vgg/software/via/demo/via_audio_annotator.html">音频</a> 和 <a target="_blank" href="http://www.robots.ox.ac.uk/~vgg/software/via/demo/via_video_annotator.html">视频</a> 标注演示。</li>
+        <li>你也可以打开本地的 <a href="via_image.html">图片</a>、<a href="via_audio.html">音频</a>、<a href="via_video.html">视频</a> 和 <a href="via_pair.html">成对比较</a> 标注器。</li>
       </ul>
     </div>
 
     <!-- VIA dynamically populates this container with control panel, media (image, video, etc), etc. -->
     <div class="via_container" id="via_container"></div>
 
-    <script src="../js/_via_util.js"></script>
-    <script src="../js/_via_const.js"></script>
-    <script src="../js/_via_config.js"></script>
+    <script src="js/_via_const.js"></script>
+    <script src="js/_via_config.js"></script>
 
-    <script src="../js/_via_event.js"></script>
-    <script src="../js/_via_control_panel.js"></script>
-    <script src="../js/_via_metadata.js"></script>
-    <script src="../js/_via_file.js"></script>
-    <script src="../js/_via_attribute.js"></script>
-    <script src="../js/_via_view.js"></script>
-    <script src="../js/_via_data.js"></script>
-    <script src="../js/_via_import_export.js"></script>
+    <script src="js/_via_event.js"></script>
+    <script src="js/_via_control_panel.js"></script>
+    <script src="js/_via_metadata.js"></script>
+    <script src="js/_via_file.js"></script>
+    <script src="js/_via_attribute.js"></script>
+    <script src="js/_via_view.js"></script>
+    <script src="js/_via_data.js"></script>
+    <script src="js/_via_share.js"></script>
+    <script src="js/_via_store_localstorage.js"></script>
+    <script src="js/_via_import_export.js"></script>
 
-    <script src="../js/_via_video_thumbnail.js"></script>
-    <script src="../js/_via_file_annotator.js"></script>
-    <script src="../js/_via_temporal_segmenter.js"></script>
-    <script src="../js/_via_view_annotator.js"></script>
+    <script src="js/_via_video_thumbnail.js"></script>
+    <script src="js/_via_file_annotator.js"></script>
+    <script src="js/_via_temporal_segmenter.js"></script>
+    <script src="js/_via_view_annotator.js"></script>
 
-    <script src="../js/_via_view_manager.js"></script>
+    <script src="js/_via_view_manager.js"></script>
 
-    <script src="../js/_via_category.js"></script>
-    <script src="../js/_via_editor.js"></script>
-    <script src="../js/_via_debug_project.js"></script>
-    <script src="../js/_via.js"></script>
+    <script src="js/_via_category.js"></script>
+    <script src="js/_via_editor.js"></script>
+    <script src="js/_via_debug_project.js"></script>
+    <script src="js/_via.js"></script>
 
     <!-- Used by external programs (e.g. imfind) to create VIA3 application that automatically loads a project file -->
     <!-- <script>__VIA_SUBMODULE_LOADER__</script> -->

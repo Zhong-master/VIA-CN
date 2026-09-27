@@ -119,6 +119,10 @@ _via_file_annotator.prototype._init = function() {
 }
 
 _via_file_annotator.prototype._magnifier_toggle = function() {
+  if ( ! this.magnifier_container ) {
+    _via_util_msg_show('请先加载图片后再使用放大镜。', true);
+    return;
+  }
   if(this._is_magnifier_enabled) {
     this.magnifier_container.classList.add('hide');
     this._is_magnifier_enabled = false;
@@ -134,6 +138,7 @@ _via_file_annotator.prototype._magnifier_toggle = function() {
 }
 
 _via_file_annotator.prototype._magnifier_activate = function() {
+  if ( ! this.magnifier_container ) { return; }
   this.magnifier_container.innerHTML = '';
 
   // add filecontent
@@ -169,6 +174,7 @@ _via_file_annotator.prototype._magnifier_activate = function() {
 }
 
 _via_file_annotator.prototype._magnifier_update_position = function() {
+  if ( ! this.magnifier_container ) { return; }
   var magnifier_panel_left = this.left_pad + this.last_cx - this.magnifier_container.offsetWidth/2;
   var magnifier_panel_top  = this.last_cy - this.magnifier_container.offsetHeight/2;
 
@@ -266,7 +272,7 @@ _via_file_annotator.prototype._file_load_show_error_page = function() {
     locprefix_input.setAttribute('type', 'text');
     locprefix_input.setAttribute('value', this.d.store.config.file.loc_prefix[fileloc]);
     locprefix_input.setAttribute('data-pname', 'loc_prefix');
-    locprefix_input.setAttribute('title', 'Location prefix (or path) that will be automatically added to file locations. For example, if you add "http://www.mysite.com/data/images/" as the location prefix, all your images will be sourced from this site.');
+    locprefix_input.setAttribute('title', '自动添加到文件路径前的位置前缀（或路径）。例如填写 "http://www.mysite.com/data/images/"，则所有图片都从该地址加载。');
     locprefix_input.addEventListener('change', this._file_on_attribute_update.bind(this));
     fileloc_cell.appendChild(locprefix_input);
   }
@@ -706,9 +712,9 @@ _via_file_annotator.prototype._rinput_keydown_handler = function(e) {
       _via_util_msg_show( '已完成绘制带多个顶点的区域形状。');
     } else {
       if (this.va.region_draw_shape == _VIA_RSHAPE.EXTREME_BOX) {
-        _via_util_msg_show('You must define all 4 vertices. Press <span class="key">Esc</span> to cancel last drawn vertex.');
+        _via_util_msg_show('必须定义 4 个顶点。按 <span class="key">Esc</span> 可取消最后绘制的顶点。');
       } else {
-        _via_util_msg_show('You must define at least 2 vertices. Press <span class="key">Esc</span> to cancel last drawn vertex.');
+        _via_util_msg_show('至少需要定义 2 个顶点。按 <span class="key">Esc</span> 可取消最后绘制的顶点。');
       }
     }
   }
@@ -873,7 +879,7 @@ _via_file_annotator.prototype._rinput_mouseup_handler = function(e) {
       this.user_input_pts.push(cx, cy);
       if ( this._is_user_input_pts_equal() ) {
         if ( this.va.region_draw_shape !== _VIA_RSHAPE.POINT ) {
-          _via_util_msg_show('Discarded degenerate region. Press <span class="key">Space</span> key to play or pause video or use the "Point" shape to define key points.');
+          _via_util_msg_show('已丢弃退化的区域。按 <span class="key">空格</span> 播放或暂停视频，或使用“点”形状来标注关键点。');
         } else {
           var canvas_input_pts = this.user_input_pts.slice(0);
           this._metadata_add(this.va.region_draw_shape, canvas_input_pts);
@@ -904,7 +910,7 @@ _via_file_annotator.prototype._rinput_mouseup_handler = function(e) {
     this._smetadata_show();
     this._creg_draw_all();
     this._state_set( _VIA_RINPUT_STATE.REGION_SELECTED );
-    _via_util_msg_show('Region selected. Press <span class="key">Backspace</span> key to delete and arrow keys to move selected region. Use mouse wheel to update region label.', true);
+    _via_util_msg_show('已选中区域。按 <span class="key">Backspace</span> 删除，方向键移动选区；滚动鼠标滚轮可切换区域标签。', true);
     return;
   }
 
@@ -1101,7 +1107,7 @@ _via_file_annotator.prototype._rinput_mousemove_handler = function(e) {
         // fall through and show message if it is polygon or polyline
       case _VIA_RSHAPE.POLYGON:
       case _VIA_RSHAPE.POLYLINE:
-        _via_util_msg_show('To move vertex, simply drag the vertex. To add vertex, press [Ctrl] key and click on the edge. To delete vertex, press [Ctrl] (or [Command]) key and click on vertex.');
+        _via_util_msg_show('拖动顶点即可移动；按住 [Ctrl] 并点击边可添加顶点；按住 [Ctrl]（Mac 为 [Command]）并点击顶点可删除顶点。');
         break;
       }
     } else {
@@ -1619,10 +1625,12 @@ _via_file_annotator.prototype._creg_add = function(vid, mid) {
 }
 
 _via_file_annotator.prototype._creg_clear = function() {
+  if ( !this.rshapectx || !this.rshape_canvas ) { return; }
   this.rshapectx.clearRect(0, 0, this.rshape_canvas.width, this.rshape_canvas.height);
 }
 
 _via_file_annotator.prototype._creg_draw_all = function() {
+  if ( !this.rshapectx ) { return; }
   this._creg_clear();
 
   if ( this.d.store.config.ui['spatial_region_label_attribute_id'] === '' ) {
@@ -2128,10 +2136,12 @@ _via_file_annotator.prototype._creg_is_on_sel_region_cp  = function(cx, cy, tole
 
 _via_file_annotator.prototype._creg_select_one = function(mid) {
   this.selected_mid_list = [mid];
+  this._notify_selection_changed();
 }
 
 _via_file_annotator.prototype._creg_select = function(mid) {
   this.selected_mid_list.push(mid);
+  this._notify_selection_changed();
 }
 
 _via_file_annotator.prototype._creg_select_multiple = function(mid_list) {
@@ -2141,6 +2151,7 @@ _via_file_annotator.prototype._creg_select_multiple = function(mid_list) {
       this.selected_mid_list.push( mid_list[i] );
     }
   }
+  this._notify_selection_changed();
 }
 
 _via_file_annotator.prototype._creg_select_toggle = function(mid_list) {
@@ -2158,10 +2169,19 @@ _via_file_annotator.prototype._creg_select_toggle = function(mid_list) {
       }
     }
   }
+  this._notify_selection_changed();
 }
 
 _via_file_annotator.prototype._creg_select_none = function() {
   this.selected_mid_list = [];
+  this._notify_selection_changed();
+}
+
+// 让属性编辑器同步高亮/刷新当前文件中被选中的标注
+_via_file_annotator.prototype._notify_selection_changed = function() {
+  if ( window.via && window.via.editor && window.via.editor.region_update ) {
+    window.via.editor.region_update();
+  }
 }
 
 _via_file_annotator.prototype._creg_select_all = function() {
@@ -2286,6 +2306,7 @@ _via_file_annotator.prototype._on_event_metadata_update = function(data, event_p
   var vid = event_payload.vid;
   var mid = event_payload.mid;
   if ( this.vid === vid &&
+       this.d.store.metadata[mid] &&
        this.d.store.metadata[mid].xy.length
      ) {
     this._creg_add(vid, mid);
@@ -2752,10 +2773,12 @@ _via_file_annotator.prototype._rinput_disable = function() {
 // on-screen file metadata editor
 //
 _via_file_annotator.prototype._fmetadata_hide = function() {
+  if ( ! this.fmetadata_container ) { return; }
   this.fmetadata_container.classList.add('hide');
 }
 
 _via_file_annotator.prototype._fmetadata_set_position = function() {
+  if ( ! this.fmetadata_container ) { return; }
   var x = this.left_pad + this.conf.FILE_METADATA_MARGIN;
   var y = this.conf.FILE_METADATA_MARGIN;
 
@@ -2769,6 +2792,8 @@ _via_file_annotator.prototype._fmetadata_toggle = function() {
 }
 
 _via_file_annotator.prototype._fmetadata_show = function() {
+  // 视图中尚未创建文件元数据容器时（例如图片加载过程中收到属性更新事件）直接忽略
+  if ( ! this.fmetadata_container ) { return; }
   if ( ! this.d.cache.attribute_group.hasOwnProperty('FILE1_Z0_XY0') ) {
     this.fmetadata_container.innerHTML = '';
     this._fmetadata_hide();
@@ -2822,13 +2847,14 @@ _via_file_annotator.prototype._fmetadata_toggle_button = function() {
     span.setAttribute('title', '隐藏（最小化）文件元数据编辑器');
   } else {
     span.innerHTML = '&rarr;';
-    span.setAttribute('title', 'Show file metadata editor (to edit properties of a file like caption, author, etc.)');
+    span.setAttribute('title', '显示文件元数据编辑器（编辑标题、作者等文件属性）');
   }
   span.addEventListener('click', this._fmetadata_toggle.bind(this));
   return span;
 }
 
 _via_file_annotator.prototype._fmetadata_update = function(mid) {
+  if ( ! this.fmetadata_container ) { return; }
   var aid_list = this.d.cache.attribute_group['FILE1_Z0_XY0'];
   var table = document.createElement('table');
   var header = this._metadata_header_html(aid_list);
@@ -2865,10 +2891,12 @@ _via_file_annotator.prototype._fmetadata_update = function(mid) {
 // on-screen spatial metadata editor
 //
 _via_file_annotator.prototype._smetadata_hide = function() {
+  if ( ! this.smetadata_container ) { return; }
   this.smetadata_container.classList.add('hide');
 }
 
 _via_file_annotator.prototype._smetadata_set_position = function() {
+  if ( ! this.smetadata_container ) { return; }
   var mid = this.selected_mid_list[0];
   var x = this.left_pad + this.creg[mid][1];
   var y = this.conf.REGION_SMETADATA_MARGIN + this.creg[mid][2];
@@ -2913,10 +2941,10 @@ _via_file_annotator.prototype._smetadata_toggle_button = function() {
   span.setAttribute('class', 'text_button');
   if ( this.d.store.config.ui['spatial_metadata_editor_visible'] ) {
     span.innerHTML = '&larr;';
-    span.setAttribute('title', 'Hide (i.e. minimise) spatial metadata editor');
+    span.setAttribute('title', '隐藏（最小化）空间元数据编辑器');
   } else {
     span.innerHTML = '&rarr;';
-    span.setAttribute('title', 'Show spatial metadata editor (to edit properties of a spatial region)');
+    span.setAttribute('title', '显示空间元数据编辑器（编辑空间区域的属性）');
   }
   span.addEventListener('click', this._smetadata_toggle.bind(this));
   return span;
@@ -2933,6 +2961,7 @@ _via_file_annotator.prototype._smetadata_show = function() {
 }
 
 _via_file_annotator.prototype._smetadata_update = function() {
+  if ( ! this.smetadata_container ) { return; }
   var aid_list = this.d._cache_get_attribute_group(['FILE1_Z1_XY1',
                                                     'FILE1_Z0_XY1',
                                                     'FILE1_Z2_XY0']);

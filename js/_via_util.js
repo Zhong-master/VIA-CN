@@ -548,7 +548,7 @@ function _via_util_attribute_to_html_element(attr) {
 
   default:
     el = document.createElement('span');
-    el.innerHTML = 'UNKNOWN';
+    el.innerHTML = '未知';
   }
   return el;
 }

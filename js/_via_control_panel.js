@@ -36,6 +36,12 @@ _via_control_panel.prototype._init = function(type) {
 
   this._add_spacer();
 
+  var help_button = _via_util_get_svg_button('micon_help', '关于 / 帮助', 'help');
+  help_button.addEventListener('click', function() {
+    _via_util_page_show('page_about');
+  });
+  this.c.appendChild(help_button);
+
 }
 
 _via_control_panel.prototype._add_spacer = function() {
@@ -99,6 +105,31 @@ _via_control_panel.prototype._add_region_shape_selector = function() {
   this.hand_button = hand;
   this.hand_selected = false;
   zoom_group.appendChild(hand);
+
+  // 图片标注器：放大 / 缩小 / 放大镜
+  var is_image_page = !!document.querySelector('link[href*="via_image_annotator.css"]');
+  if ( is_image_page && document.getElementById('micon_zoomin') ) {
+    var zoom_in = _via_util_get_svg_button('micon_zoomin', '放大');
+    zoom_in.addEventListener('click', function() {
+      this.emit_event( 'zoom_in', {}); // control_panel -> view_annotator (bound in _via.js)
+    }.bind(this));
+    zoom_group.appendChild(zoom_in);
+
+    var zoom_out = _via_util_get_svg_button('micon_zoomout', '缩小');
+    zoom_out.addEventListener('click', function() {
+      this.emit_event( 'zoom_out', {}); // control_panel -> view_annotator (bound in _via.js)
+    }.bind(this));
+    zoom_group.appendChild(zoom_out);
+
+    if ( document.getElementById('micon_search') ) {
+      var magnifier = _via_util_get_svg_button('micon_search', '放大镜：精细检查图像细节（点击开关）');
+      magnifier.addEventListener('click', function() {
+        this.emit_event( 'magnifier_toggle', {}); // control_panel -> view_annotator (bound in _via.js)
+      }.bind(this));
+      this.magnifier_button = magnifier;
+      zoom_group.appendChild(magnifier);
+    }
+  }
 
   sidebar.appendChild(zoom_group);
 

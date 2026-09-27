@@ -277,7 +277,7 @@ _via_view_manager.prototype._file_add_from_filelist = function(filelist) {
       }
       filetype_summary[ftype_str] = filetype_summary[ftype_str] + 1;
     }
-    _via_util_msg_show('Added ' + ok.fid_list.length + ' files. ' + JSON.stringify(filetype_summary));
+    _via_util_msg_show('已添加 ' + ok.fid_list.length + ' 个文件。' + JSON.stringify(filetype_summary));
   }.bind(this), function(err) {
     _via_util_msg_show('添加文件失败！[' + err + ']');
     console.warn(err);

@@ -1586,12 +1586,12 @@ _via_temporal_segmenter.prototype._on_event_keydown = function(e) {
     }
     if ( this.m.paused ) {
       this.m.play();
-      _via_util_msg_show('Playing ...');
+      _via_util_msg_show('播放中…');
     } else {
       this.m.pause();
-      _via_util_msg_show('Paused. Press <span class="key">a</span> to add a temporal segment, ' +
-                         '<span class="key">Tab</span> to select and ' +
-                         '<span class="key">&uarr;</span>&nbsp;<span class="key">&darr;</span> to select another temporal segment timeline.', true);
+      _via_util_msg_show('已暂停。按 <span class="key">a</span> 添加时间片段，' +
+                         '<span class="key">Tab</span> 选择，' +
+                         '<span class="key">&uarr;</span>&nbsp;<span class="key">&darr;</span> 切换时间线。', true);
     }
   }
 
@@ -1665,6 +1665,31 @@ _via_temporal_segmenter.prototype._on_event_keydown = function(e) {
   if ( e.key === '0' ) {
     e.preventDefault();
     this.m.playbackRate = 1;
+    return;
+  }
+
+  if ( e.key === '+' ) {
+    if ( ! e.ctrlKey ) {
+      e.preventDefault();
+      this.m.playbackRate = Math.min(16, this.m.playbackRate + 0.1);
+    }
+    return;
+  }
+  if ( e.key === '-' ) {
+    if ( ! e.ctrlKey ) {
+      e.preventDefault();
+      if ( this.m.playbackRate > 0.1 ) {
+        this.m.playbackRate = this.m.playbackRate - 0.1;
+      }
+    }
+    return;
+  }
+  if ( e.key === 'm' || e.key === 'M' ) {
+    if ( ! e.ctrlKey ) {
+      e.preventDefault();
+      this.m.muted = !this.m.muted;
+      _via_util_msg_show(this.m.muted ? '已静音' : '已取消静音');
+    }
     return;
   }
 
@@ -1796,7 +1821,7 @@ _via_temporal_segmenter.prototype._on_event_keydown = function(e) {
       } else {
         // selected the group above/below the current group in the timeline list
         this._tmetadata_group_gid_sel(next_gindex);
-        _via_util_msg_show('Selected group "' + this.selected_gid + '"');
+        _via_util_msg_show('已选择分组 “' + this.selected_gid + '”');
         return;
       }
     }
@@ -2036,7 +2061,7 @@ _via_temporal_segmenter.prototype._group_add_gid = function(gid) {
     this.gid_list.push(gid);
     this.metadata_tbody.appendChild( this._tmetadata_group_gid_html(gid) );
     this.new_group_id_input.value = ''; // clear input field
-    _via_util_msg_show('Add ' + this.d.attribute_store[this.groupby_aid].aname +
+    _via_util_msg_show('已添加 ' + this.d.attribute_store[this.groupby_aid].aname +
                        ' [' + gid + ']');
   }
 }
@@ -2137,7 +2162,7 @@ _via_temporal_segmenter.prototype._toolbar_init = function() {
   for ( var pb_mode_name in pb_mode_option_list ) {
     var oi = document.createElement('option');
     oi.setAttribute('value', pb_mode_option_list[pb_mode_name]);
-    oi.innerHTML = 'Playback: ' + pb_mode_name;
+    oi.innerHTML = '播放模式：' + pb_mode_name;
     pb_mode_select.appendChild(oi);
   }
   pb_mode_container.appendChild(pb_mode_select);
@@ -2244,7 +2269,7 @@ _via_temporal_segmenter.prototype._toolbar_gid_del = function() {
     this.d.metadata_delete_bulk(this.vid, del_mid_list, false).then( function(ok) {
       this._tmetadata_gmetadata_update();
       document.getElementById('gid_add_del_input').value = '';
-      _via_util_msg_show('已删除时间线 ' + JSON.stringify(del_gid_list) + ' and ' + del_mid_list.length + ' 与此时间线相关的元数据。');
+      _via_util_msg_show('已删除时间线 ' + JSON.stringify(del_gid_list) + '，以及与此时间线相关的 ' + del_mid_list.length + ' 条元数据。');
     }.bind(this), function(err) {
       _via_util_msg_show('删除失败 ' + del_mid_list.length + ' 与时间线相关的元数据 ' + JSON.stringify(del_gid_list));
     }.bind(this));
@@ -2259,14 +2284,14 @@ _via_temporal_segmenter.prototype._toolbar_gid_del = function() {
 _via_temporal_segmenter.prototype._on_event_attribute_update = function(data, event_payload) {
   var aid = event_payload.aid;
   if ( this.groupby_aid === aid ) {
-    _via_util_msg_show('Attribute [' + this.d.store['attribute'][aid]['aname'] + '] updated.');
+    _via_util_msg_show('属性 [' + this.d.store['attribute'][aid]['aname'] + '] 已更新。');
     this._init();
   }
 }
 
 _via_temporal_segmenter.prototype._on_event_metadata_update_bulk = function(data, event_payload) {
   if ( this.vid === event_payload.vid ) {
-    _via_util_msg_show('Updated ' + event_payload.mid_list.length + ' metadata');
+    _via_util_msg_show('已更新 ' + event_payload.mid_list.length + ' 条元数据');
   }
 }
 
@@ -2340,7 +2365,7 @@ _via_temporal_segmenter.prototype._tseg_metadata_update = function() {
   minimise_button.setAttribute('class', 'text_button');
   if ( this.d.store.config.ui['temporal_segment_metadata_editor_visible'] ) {
     minimise_button.innerHTML = '&larr;';
-    minimise_button.setAttribute('title', 'Hide (i.e. minimise) temporal segment metadata editor');
+    minimise_button.setAttribute('title', '隐藏（最小化）时间片段元数据编辑器');
   } else {
     minimise_button.innerHTML = '&rarr;';
     minimise_button.setAttribute('title', '显示时间片段元数据编辑器');

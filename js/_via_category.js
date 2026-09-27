@@ -38,8 +38,15 @@ _via_category.prototype.init = function() {
         return;
       }
     }
+    // 类别属性的锚点取决于标注器类型：
+    //  - 成对比较：属性作用于“一组文件”
+    //  - 图片/视频：属性作用于单个文件中的空间区域
+    var anchor_id = 'FILE1_Z0_XY1';
+    if ( document.querySelector('link[href*="via_pair_annotator.css"]') ) {
+      anchor_id = 'FILEN_Z0_XY0';
+    }
     // 创建类别属性
-    self.d.attribute_add('类别', 'FILE1_Z0_XY1', _VIA_ATTRIBUTE_TYPE.SELECT, '标注类别', {}, '').then(function(aid) {
+    self.d.attribute_add('类别', anchor_id, _VIA_ATTRIBUTE_TYPE.SELECT, '标注类别', {}, '').then(function(aid) {
       self.category_aid = aid;
       self.d.store.config.ui.category_aid = aid;
       self.d.store.config.ui.category_colors = {};

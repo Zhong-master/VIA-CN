@@ -20,6 +20,14 @@ function _via(via_container) {
 
   this.d  = new _via_data();
 
+  // 共享项目（与 VIA 项目服务器通信，供“VIA 共享项目”导入使用）
+  this.s = new _via_share(this.d, { 'ENDPOINT': _VIA_REMOTE_STORE });
+
+  // 浏览器本地自动保存 / 恢复，避免刷新页面丢失标注
+  this.lstore = new _via_store_localstorage(this.d);
+  this.lstore._init();
+  this._restore_local_store();
+
   if ( typeof(_VIA_DEBUG) === 'undefined' || _VIA_DEBUG === true ) {
     // ADD DEBUG CODE HERE (IF NEEDED)
   }
@@ -127,20 +135,34 @@ function _via(via_container) {
   this.cp.on_event('editor_toggle', this._ID, function(data, event_payload) {
     this.editor.toggle();
   }.bind(this));
-  this.cp.on_event('zoom_in', this._ID, function(data, event_payload) {
-    if(this.va.view_mode === _VIA_VIEW_MODE.IMAGE1) {
-      this.va.file_annotator[0][0]._zoom_in();
+  // 对当前视图中的所有文件标注器应用缩放/放大镜操作
+  var for_each_file_annotator = function(callback) {
+    var fa_list = (this.va.file_annotator[0] || []);
+    for ( var i = 0; i < fa_list.length; ++i ) {
+      if ( fa_list[i] ) {
+        callback(fa_list[i]);
+      }
     }
+  }.bind(this);
+  this.cp.on_event('magnifier_toggle', this._ID, function(data, event_payload) {
+    for_each_file_annotator(function(fa) {
+      if ( fa._magnifier_toggle ) { fa._magnifier_toggle(); }
+    });
+  }.bind(this));
+  this.cp.on_event('zoom_in', this._ID, function(data, event_payload) {
+    for_each_file_annotator(function(fa) {
+      if ( fa._zoom_in ) { fa._zoom_in(); }
+    });
   }.bind(this));
   this.cp.on_event('zoom_out', this._ID, function(data, event_payload) {
-    if(this.va.view_mode === _VIA_VIEW_MODE.IMAGE1) {
-      this.va.file_annotator[0][0]._zoom_out();
-    }
+    for_each_file_annotator(function(fa) {
+      if ( fa._zoom_out ) { fa._zoom_out(); }
+    });
   }.bind(this));
   this.cp.on_event('fit_screen', this._ID, function(data, event_payload) {
-    if(this.va.view_mode === _VIA_VIEW_MODE.IMAGE1) {
-      this.va.file_annotator[0][0]._zoom_fit_screen();
-    }
+    for_each_file_annotator(function(fa) {
+      if ( fa._zoom_fit_screen ) { fa._zoom_fit_screen(); }
+    });
   }.bind(this));
   this.cp.on_event('hand_toggle', this._ID, function(data, event_payload) {
     // 手模式状态由控制面板 _set_hand_mode_ui 统一管理（单选互斥）
@@ -200,8 +222,47 @@ function _via(via_container) {
     }
   }
 
+  // 填充“关于”页面的版本号
+  var about_page = document.querySelector('[data-pageid="page_about"]');
+  if ( about_page ) {
+    about_page.innerHTML = about_page.innerHTML.replace(/__VIA_VERSION__/g, _VIA_VERSION);
+  }
+
   // ready
-  _via_util_msg_show(_VIA_NAME + ' (' + _VIA_NAME_SHORT + ') ' + _VIA_VERSION + ' ready.');
+  _via_util_msg_show(_VIA_NAME + ' (' + _VIA_NAME_SHORT + ') ' + _VIA_VERSION + ' 已就绪。');
+  if ( this._local_restore_ts ) {
+    setTimeout( function() {
+      _via_util_msg_show('已恢复上次自动保存的标注（' +
+                         new Date(this._local_restore_ts).toLocaleString() + '）');
+    }.bind(this), 1200);
+  }
+}
+
+// 从 localStorage 恢复上次会话（页面初始化早期调用，UI 尚未构建）
+_via.prototype._restore_local_store = function() {
+  this._local_restore_ts = 0;
+  if ( !this.lstore || !this.lstore.available ) {
+    return;
+  }
+  var saved = this.lstore.load();
+  if ( !saved ) {
+    return;
+  }
+  try {
+    this.d.project_load_json(saved);
+    this._local_restore_ts = this.lstore.timestamp();
+  }
+  catch(e) {
+    console.warn('恢复本地自动保存失败：' + e);
+  }
+}
+
+// 清除浏览器中保存的自动保存数据
+_via.prototype._local_store_clear = function() {
+  if ( this.lstore ) {
+    this.lstore.clear();
+  }
+  _via_util_msg_show('已清除浏览器中的本地自动保存数据');
 }
 
 _via.prototype._hook_on_browser_resize = function() {

@@ -1827,3 +1827,18 @@ html, body {
   font-size: 12px;
   text-align: center;
 }
+
+
+/* ===== VIA-CN: 属性编辑器中的“当前文件的标注”列表 ===== */
+.region_list_panel { max-height: 40vh; overflow-y: auto; margin-bottom: 1em; }
+.region_row { display: flex; align-items: center; gap: 0.4em; padding: 0.25em 0.4em;
+              border-radius: 4px; border: 1px solid transparent; }
+.region_row:hover { background: rgba(255,255,255,0.06); }
+.region_row_active { border-color: #4d9fff; background: rgba(77,159,255,0.15); }
+.region_row_index { color: #9a9aa0; font-size: 0.85em; min-width: 2.2em; }
+.region_row_category { flex: 1; min-width: 0; }
+.region_row_coord { flex: 1; color: #9a9aa0; font-size: 0.85em;
+                    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.region_row_delete { background: transparent; border: none; color: #ff6b6b;
+                     cursor: pointer; font-size: 1em; padding: 0 0.3em; }
+.region_row_delete:hover { color: #ff3b3b; }

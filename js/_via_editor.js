@@ -10,9 +10,14 @@ function _via_editor(data, view_annotator, container) {
   this.va = view_annotator;
   this.c  = container;
 
+  // 类别模式下不再直接渲染这两个旧视图，但保留占位以避免空引用
+  this.metadata_view = document.createElement('table');
+  this.attribute_view = document.createElement('table');
+
   // initialise event listeners
   this.d.on_event('file_show', this._ID, this.on_event_file_show.bind(this));
   this.d.on_event('metadata_add', this._ID, this.on_event_metadata_add.bind(this));
+  this.d.on_event('metadata_update', this._ID, this.on_event_metadata_update.bind(this));
   this.d.on_event('metadata_del', this._ID, this.on_event_metadata_del.bind(this));
   this.d.on_event('attribute_update', this._ID, this.on_event_attribute_update.bind(this));
   this.d.on_event('attribute_del', this._ID, this.on_event_attribute_del.bind(this));
@@ -129,7 +134,107 @@ _via_editor.prototype.show = function() {
   this.category_list.setAttribute('class', 'category_list_panel');
   cat_container.appendChild(this.category_list);
 
+  // 当前文件的标注列表：可直接修改已有区域的类别或删除
+  var region_title = document.createElement('h2');
+  region_title.innerHTML = '当前文件的标注';
+  cat_container.appendChild(region_title);
+  this.region_list = document.createElement('div');
+  this.region_list.setAttribute('class', 'region_list_panel');
+  cat_container.appendChild(this.region_list);
+
   this.attributes_update();
+  this.region_update();
+}
+
+// 渲染当前文件的标注列表，支持修改已有区域的类别
+_via_editor.prototype.region_update = function() {
+  if ( !this.region_list || this.c.classList.contains('hide') ) {
+    return;
+  }
+  this.region_list.innerHTML = '';
+
+  if ( !this.va || !this.va.vid ) {
+    this.region_list.innerHTML = '<div class="category_manager_empty">当前没有正在查看的文件</div>';
+    return;
+  }
+  this.d._cache_update_mid_list();
+  var mid_list = (this.d.cache.mid_list[this.va.vid] || []).slice(0);
+  if ( !mid_list.length ) {
+    this.region_list.innerHTML = '<div class="category_manager_empty">当前文件暂无标注；先在左侧选择类别与形状，再在图上绘制。</div>';
+    return;
+  }
+
+  var cat = (window.via && window.via.category) ? window.via.category : null;
+  var selected_mid_list = [];
+  if ( this.va.file_annotator[0] && this.va.file_annotator[0][0] &&
+       this.va.file_annotator[0][0].selected_mid_list ) {
+    selected_mid_list = this.va.file_annotator[0][0].selected_mid_list;
+  }
+  var self = this;
+
+  for ( var i = 0; i < mid_list.length; ++i ) {
+    var mid = mid_list[i];
+    var is_selected = selected_mid_list.indexOf(mid) !== -1;
+    var row = document.createElement('div');
+    row.setAttribute('class', 'region_row' + (is_selected ? ' region_row_active' : ''));
+    row.setAttribute('data-mid', mid);
+
+    var index = document.createElement('span');
+    index.setAttribute('class', 'region_row_index');
+    index.textContent = '#' + (i + 1);
+    row.appendChild(index);
+
+    if ( cat && cat.category_aid && this.d.store.metadata[mid] ) {
+      var sel = document.createElement('select');
+      sel.setAttribute('class', 'region_row_category');
+      var current = this.d.store.metadata[mid].av[cat.category_aid];
+
+      var none = document.createElement('option');
+      none.setAttribute('value', '');
+      none.textContent = '（未分类）';
+      if ( !current ) { none.selected = true; }
+      sel.appendChild(none);
+
+      var cats = cat.get_categories();
+      for ( var ci = 0; ci < cats.length; ++ci ) {
+        var opt = document.createElement('option');
+        opt.setAttribute('value', cats[ci].id);
+        opt.textContent = cats[ci].name;
+        if ( cats[ci].id === current ) { opt.selected = true; }
+        sel.appendChild(opt);
+      }
+      sel.addEventListener('change', (function(mid) {
+        return function(e) {
+          var val = e.target.value;
+          self.d.metadata_update_av(self.va.vid, mid, cat.category_aid, val);
+          self.region_update();
+        };
+      })(mid));
+      row.appendChild(sel);
+    } else {
+      var coord = document.createElement('span');
+      coord.setAttribute('class', 'region_row_coord');
+      coord.textContent = this.d.store.metadata[mid].xy.join(', ');
+      row.appendChild(coord);
+    }
+
+    var del = document.createElement('button');
+    del.setAttribute('class', 'region_row_delete');
+    del.innerHTML = '✕';
+    del.setAttribute('title', '删除该标注');
+    del.addEventListener('click', (function(mid) {
+      return function() {
+        self.d.metadata_delete(self.va.vid, mid).then(function() {
+          self.region_update();
+        }, function(err) {
+          _via_util_msg_show('删除标注失败');
+        });
+      };
+    })(mid));
+    row.appendChild(del);
+
+    this.region_list.appendChild(row);
+  }
 }
 
 //
@@ -449,8 +554,8 @@ _via_editor.prototype.get_attribute = function(aid) {
     option_input.setAttribute('data-aid', aid);
     option_input.setAttribute('data-varname', 'options');
     option_input.setAttribute('rows', '2');
-    option_input.setAttribute('placeholder', 'e.g. a,*b,c,d');
-    option_input.setAttribute('title', 'Enter options as comma separated value with the default option prefixed using an *. For example: "a,*b,c"');
+    option_input.setAttribute('placeholder', '例如：a,*b,c,d');
+    option_input.setAttribute('title', '以逗号分隔输入可选项；默认选项前加 *。例如："a,*b,c"');
     option_input.addEventListener('change', this.attribute_on_change.bind(this));
     option_input.innerHTML = _via_util_obj_to_csv(this.d.store.attribute[aid].options,
                                                   this.d.store.attribute[aid].default_option_id);
@@ -730,8 +835,8 @@ _via_editor.prototype._refresh_type_dependent_fields = function(aid) {
       option_input.setAttribute('data-aid', aid);
       option_input.setAttribute('data-varname', 'options');
       option_input.setAttribute('rows', '2');
-      option_input.setAttribute('placeholder', 'e.g. a,*b,c,d');
-      option_input.setAttribute('title', 'Enter options as comma separated value with the default option prefixed using an *. For example: "a,*b,c"');
+      option_input.setAttribute('placeholder', '例如：a,*b,c,d');
+      option_input.setAttribute('title', '以逗号分隔输入可选项；默认选项前加 *。例如："a,*b,c"');
       option_input.addEventListener('change', this.attribute_on_change.bind(this));
       option_input.innerHTML = _via_util_obj_to_csv(this.d.store.attribute[aid].options,
                                                     this.d.store.attribute[aid].default_option_id);
@@ -780,13 +885,17 @@ _via_editor.prototype.on_event_attribute_add = function(data, event_payload) {
 }
 
 _via_editor.prototype.on_event_metadata_add = function(data, event_payload) {
-  //this.metadata_update();
+  this.region_update();
+}
+
+_via_editor.prototype.on_event_metadata_update = function(data, event_payload) {
+  this.region_update();
 }
 
 _via_editor.prototype.on_event_metadata_del = function(data, event_payload) {
-  //this.metadata_update();
+  this.region_update();
 }
 
 _via_editor.prototype.on_event_file_show = function(data, event_payload) {
-  //this.metadata_update();
+  this.region_update();
 }
