@@ -10,7 +10,9 @@ name: Publish to npm
 #        Repository:        VIA-CN
 #        Workflow filename: publish.yml        （只写文件名，不要带 .github/workflows/）
 #        Allowed actions:   npm publish
-#   详见 PUBLISHING.md
+#
+# 完成上述两步后，改 package.json 版本号并推送同名 tag 即可自动发布：
+#   git tag v3.0.14 && git push origin v3.0.14
 
 on:
   push:

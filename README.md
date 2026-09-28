@@ -1,118 +1,104 @@
-# VIA-CN 标注工具
+# VIA-CN
 
-基于 **VGG Image Annotator (VIA) 3.0.13**（[ox-vgg/via](https://github.com/ox-vgg/via)）的汉化 + 现代化优化版，用于图像 / 视频 / 音频 / 成对比较的深度学习数据标注。
+基于 [VGG Image Annotator (VIA) 3.0.13](https://github.com/ox-vgg/via) 的中文标注工具，支持**图片 / 视频 / 音频 / 图像成对比较**四类标注任务。纯静态实现，无需后端。
 
-## 功能亮点
+> **非官方分支**：本仓库是 VIA 的第三方中文汉化与改造版，与原项目及其作者无隶属关系。
+> 原版权归 Abhishek Dutta / Visual Geometry Group, University of Oxford 所有，遵循 BSD-2-Clause（见 [LICENSE](LICENSE)）。
 
-- **四种标注器**：图片、视频、音频、图像成对比较（`index.html` 为选择入口）
-- **中文界面**：工具栏 / 形状 / 提示 / 对话框 / 快捷键（少量专有名词与快捷键键名保留英文）
-- **深色主题**：现代化扁平风，适配所有组件
-- **类别管理**：左下角类别浮窗 + 右侧编辑器创建/选择/改色/删除类别，绘制时自动归类；
-  右侧编辑器还会列出**当前文件的全部标注**，可直接修改已有区域的类别或删除
-- **交互优化**：`a/d` 切换文件、滚轮以鼠标为中心缩放、手型拖拽平移、适应屏幕、放大 / 缩小 / 放大镜
+## 功能
+
+- **四种标注器**：图片、视频、音频、图像成对比较，`index.html` 为统一入口
+- **中文界面**：工具栏、形状、提示、对话框、快捷键均已汉化（快捷键键名与 `COCO`/`YOLO`/`WebVTT` 等专有名词保留原文）
+- **深色主题**：扁平化深色 UI，覆盖全部组件
+- **类别管理**：左下角类别浮窗 + 右侧编辑器可新建 / 选择 / 改色 / 删除类别，绘制时自动归类；
+  编辑器同时列出**当前文件的全部标注**，可直接修改已有区域的类别或删除标注
+- **交互优化**：`a`/`d` 切换文件、滚轮以光标为中心缩放、手型拖拽平移、适应屏幕、放大 / 缩小 / 放大镜
 - **底部缩略图栏**：点击直接切换文件
-- **自动保存**：标注内容（文件、视图、类别、属性、标注）自动保存到 **浏览器 localStorage**，
-  下次打开自动恢复；可在“导入/导出”面板点击“清除本地自动保存”删除
-- **导入/导出**：CSV / COCO / YOLO / 时间片段 CSV / WebVTT；支持导入 VIA2 项目 JSON
-- **共享项目**：可通过 VIA 项目服务器导入共享项目（需要能访问 `zeus.robots.ox.ac.uk`）
+- **自动保存**：文件、视图、类别、属性、标注自动保存到浏览器 localStorage，下次打开自动恢复；
+  可在“导入 / 导出”面板点击“清除本地自动保存”删除
+- **导入 / 导出**：CSV、COCO、YOLO、时间片段 CSV、WebVTT；支持导入 VIA2 项目 JSON
+- **共享项目**：可通过 VIA 项目服务器导入共享项目（需能访问 `zeus.robots.ox.ac.uk`）
 
-## Docker 一键部署（docker compose）
+## 快速开始
+
+### 方式一：内置零依赖服务器（推荐）
+
+需要 Node.js 16+，无需安装任何依赖：
 
 ```bash
-docker compose build
-docker compose up -d
+node bin/serve.js                  # http://127.0.0.1:8602/
+node bin/serve.js -p 9000          # 指定端口；端口被占用时自动 +1 重试
+node bin/serve.js --host 0.0.0.0   # 允许局域网内其他机器访问
 ```
 
-浏览器打开 `http://localhost:8000/`。
+本仓库同时按 npm 包规范组织（`name: via-cn`），发布到 npm 后可直接：
 
-> 宿主机端口 8000 → 容器 8602。`docker-compose.yml` 默认绑定 `0.0.0.0`，**局域网内其他机器**可通过 `http://<宿主机IP>:8000/` 访问（需确保宿主机防火墙放行 8000）。
+```bash
+npx via-cn
+```
 
-自定义端口：修改 `docker-compose.yml` 的 `ports` 映射即可，如 `"8080:8602"` 后访问 `http://localhost:8080/`。
+### 方式二：任意静态服务器
 
-停止服务：`docker compose down`
-
-## 直接使用（无需 Docker）
-
-**必须在仓库根目录启动静态服务器**（HTML 在根目录，`js/`、`css/` 为子目录）：
+**必须在仓库根目录启动**（HTML 位于根目录，`js/`、`css/` 为其子目录）：
 
 ```bash
 python3 -m http.server 8602
 ```
 
-然后访问 `http://localhost:8602/`。请勿直接双击 `file://` 打开 HTML，也不要部署到子路径
-（`python3 -m http.server` 需在**本目录内**启动，或让 Web 服务器把本目录映射为站点根目录）。
+然后访问 `http://localhost:8602/`。
 
-## 作为 npm 包使用
+> 请勿直接双击用 `file://` 打开 HTML，也不要把它部署到子路径——
+> 相对资源路径 `js/`、`css/` 需要以仓库根目录作为站点根目录才能解析。
 
-本包已发布为 `via-cn`，自带零依赖的本地静态服务器：
-
-```bash
-npx via-cn                 # 默认 http://127.0.0.1:8602/
-npx via-cn -p 9000         # 指定端口；端口被占用时自动 +1 重试
-npx via-cn --host 0.0.0.0  # 允许局域网内其他机器访问
-```
-
-也可以装进项目，交给自己的构建工具托管静态资源：
+### 方式三：Docker
 
 ```bash
-npm i via-cn
+docker compose up -d
 ```
 
-```js
-const via = require('via-cn');
-console.log(via.dir);           // 包根目录（HTML / js / css 所在目录）
-console.log(via.entries.image); // .../via_image.html
-```
+浏览器打开 `http://localhost:8000/`。
 
-或直接用 CDN 打开（无需安装）：
-
-```
-https://unpkg.com/via-cn@3.0.13/via_image.html
-```
-
-> 注意：本包的 `js/` 是供 `<script>` 标签全局加载的脚本，**没有** ESM/CJS 导出，
-> 因此不能 `import { ... } from 'via-cn'`，只适合当作静态资源使用。
-> 另外 localStorage 按**源**隔离，用 CDN 域名打开时数据存在该 CDN 源下。
-
-## 发布到 npm（维护者）
-
-发布由 GitHub Actions 走 npm **Trusted Publishing (OIDC)** 完成，无需长期令牌；
-首次发布必须先手动 bootstrap 一次（npm 只允许对已存在的包配置可信发布）。
-完整步骤、排错表与安全提示见 [`PUBLISHING.md`](PUBLISHING.md)。
+- 宿主机端口 8000 → 容器 8602；`docker-compose.yml` 默认绑定 `0.0.0.0`，**局域网内其他机器**可通过
+  `http://<宿主机IP>:8000/` 访问（需放行防火墙 8000）
+- 自定义端口：改 `docker-compose.yml` 的 `ports`，如 `"8080:8602"`
+- 停止：`docker compose down`
 
 ## 数据说明
 
 - 标注数据自动保存在**浏览器 localStorage**，并按标注器类型分别存储
   （`_via_cn_project_image` / `_video` / `_audio` / `_pair`），互不干扰
-- 本地图片的二进制内容**不会**写入 localStorage；恢复后如提示“找不到文件”，
+- localStorage 按**源（origin）**隔离：换域名或端口后看不到旧数据
+- 本地文件的二进制内容**不会**写入 localStorage；恢复后若提示找不到文件，
   重新添加同一批文件即可重新绑定已有标注
-- 换浏览器 / 设备时，请**导出 JSON** 再**导入**
-- 图片通过浏览器本地加载（添加文件）
+- 跨浏览器 / 跨设备迁移请**导出 JSON** 后再**导入**
+- 图片、音视频均通过浏览器本地加载（“添加文件”）
 
 ## 目录结构
 
 ```
-├── index.html            # 标注器选择入口
-├── via_image.html        # 图片标注
-├── via_video.html        # 视频标注
-├── via_audio.html        # 音频标注
-├── via_pair.html         # 成对比较
-├── js/                   # _via_*.js 模块
-├── css/                  # 4 个 annotator css
-├── bin/serve.js          # npx via-cn 的零依赖静态服务器
+├── index.html / via_image.html / via_video.html / via_audio.html / via_pair.html
+├── js/                   # _via_*.js 模块（浏览器脚本，全局加载）
+├── css/                  # 4 个 annotator 样式表
+├── bin/serve.js          # 零依赖静态服务器
 ├── index.js              # npm 入口（导出资源目录路径）
-├── package.json          # npm 包定义（files 白名单）
-├── PUBLISHING.md         # 维护者发布说明（OIDC 可信发布）
-├── .github/workflows/publish.yml  # 推 v* tag 自动发布
-├── Dockerfile
-├── docker-compose.yml
+├── package.json
+├── .github/workflows/publish.yml   # 推 v* tag 时发布到 npm（OIDC 可信发布）
+├── Dockerfile / docker-compose.yml
 └── LICENSE
 ```
 
+> `js/` 下的模块是供 `<script>` 标签全局加载的浏览器脚本，**没有** ESM/CJS 导出，
+> 因此不能 `import { ... } from 'via-cn'`；`index.js` 只用于把资源目录位置暴露给构建工具。
+>
 > `js/_via_demo_*.js`（演示工程）、`js/_via_audio_spectrum.js`（实验性频谱组件）、
-> `js/_via_debug_project.js`（示例数据）来自上游 VIA，当前页面未启用，保留供二次开发 /
-> 打包演示页使用。
+> `js/_via_debug_project.js`（示例数据）来自上游 VIA，当前页面未启用，保留供二次开发使用。
+
+## 浏览器要求
+
+建议使用最新版 Chrome / Edge / Firefox / Safari。视频与音频标注依赖
+`<video>`/`<audio>`、Canvas 与 Web Audio，较旧的浏览器可能无法完整支持。
 
 ## License
 
-本仓库基于 VIA 3.0.13 汉化，原版权归 [Abhishek Dutta / VGG / Oxford University](http://www.robots.ox.ac.uk/~vgg/software/via/)，遵循 **BSD-2-Clause**（见 LICENSE）。
+[BSD-2-Clause](LICENSE)。基于 VIA 3.0.13 汉化与改造，原版权归
+[Abhishek Dutta / Visual Geometry Group, Oxford University](https://www.robots.ox.ac.uk/~vgg/software/via/) 所有。
