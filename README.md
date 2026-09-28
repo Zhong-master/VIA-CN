@@ -35,6 +35,10 @@
 
 ![成对比较标注器](https://raw.githubusercontent.com/Zhong-master/VIA-CN/main/docs/screenshots/pair-annotator.png)
 
+> 成对视图由项目 JSON 中的**多文件视图**（一个 `view` 含两个 `fid`）定义，并需同时保留对应的
+> 单文件视图供查找（上游演示工程 `js/_via_demo_pair_annotator.js` 即此结构）。
+> 界面上的“添加文件”会为每个文件建立独立视图，因此成对标注请通过**导入项目 JSON** 建立视图。
+
 ### 标注器入口
 
 `index.html` 是四个标注器的统一选择入口。
