@@ -2,8 +2,44 @@
 
 基于 [VGG Image Annotator (VIA) 3.0.13](https://github.com/ox-vgg/via) 的中文标注工具，支持**图片 / 视频 / 音频 / 图像成对比较**四类标注任务。纯静态实现，无需后端。
 
+**[▶ 在线演示](https://zhong-master.github.io/VIA-CN/)** · [BSD-2-Clause](LICENSE)
+
+![VIA-CN 图片标注器](https://raw.githubusercontent.com/Zhong-master/VIA-CN/main/docs/screenshots/image-annotator.png)
+
 > **非官方分支**：本仓库是 VIA 的第三方中文汉化与改造版，与原项目及其作者无隶属关系。
 > 原版权归 Abhishek Dutta / Visual Geometry Group, University of Oxford 所有，遵循 BSD-2-Clause（见 [LICENSE](LICENSE)）。
+
+## 界面预览
+
+### 图片标注
+
+左侧是形状与类别工具，画布上按类别着色显示矩形 / 圆形 / 椭圆 / 多边形等区域，右侧编辑器列出当前文件的全部标注并可直接改类别或删除；底部缩略图栏显示每个文件的标注完成状态（绿色 = 已标注）。
+
+![图片标注器](https://raw.githubusercontent.com/Zhong-master/VIA-CN/main/docs/screenshots/image-annotator.png)
+
+### 视频标注
+
+逐帧划定区域，或用时间轴定义时间片段（如「某个动作从第 2 秒持续到第 5 秒」）。
+
+![视频标注器](https://raw.githubusercontent.com/Zhong-master/VIA-CN/main/docs/screenshots/video-annotator.png)
+
+### 音频标注
+
+波形 + 时间轴，用于语音片段切分、说话人标注等。
+
+![音频标注器](https://raw.githubusercontent.com/Zhong-master/VIA-CN/main/docs/screenshots/audio-annotator.png)
+
+### 图像成对比较
+
+两张图并排放置，整组打分（例如「哪张更清晰」），适合做主观质量评估数据集。
+
+![成对比较标注器](https://raw.githubusercontent.com/Zhong-master/VIA-CN/main/docs/screenshots/pair-annotator.png)
+
+### 标注器入口
+
+`index.html` 是四个标注器的统一选择入口。
+
+![入口页](https://raw.githubusercontent.com/Zhong-master/VIA-CN/main/docs/screenshots/index.png)
 
 ## 功能
 
@@ -13,7 +49,7 @@
 - **类别管理**：左下角类别浮窗 + 右侧编辑器可新建 / 选择 / 改色 / 删除类别，绘制时自动归类；
   编辑器同时列出**当前文件的全部标注**，可直接修改已有区域的类别或删除标注
 - **交互优化**：`a`/`d` 切换文件、滚轮以光标为中心缩放、手型拖拽平移、适应屏幕、放大 / 缩小 / 放大镜
-- **底部缩略图栏**：点击直接切换文件
+- **底部缩略图栏**：点击直接切换文件，并显示每个文件的标注完成状态
 - **自动保存**：文件、视图、类别、属性、标注自动保存到浏览器 localStorage，下次打开自动恢复；
   可在“导入 / 导出”面板点击“清除本地自动保存”删除
 - **导入 / 导出**：CSV、COCO、YOLO、时间片段 CSV、WebVTT；支持导入 VIA2 项目 JSON
@@ -49,6 +85,9 @@ python3 -m http.server 8602
 
 > 请勿直接双击用 `file://` 打开 HTML，也不要把它部署到子路径——
 > 相对资源路径 `js/`、`css/` 需要以仓库根目录作为站点根目录才能解析。
+>
+> 部署到 GitHub Pages 时请保留根目录的 `.nojekyll` 文件：Jekyll 默认会排除以下划线开头的文件，
+> 而本项目的脚本是 `js/_via*.js`，缺少它会加载不出任何功能。
 
 ### 方式三：Docker
 
@@ -82,7 +121,9 @@ docker compose up -d
 ├── bin/serve.js          # 零依赖静态服务器
 ├── index.js              # npm 入口（导出资源目录路径）
 ├── package.json
+├── docs/screenshots/     # 界面截图
 ├── .github/workflows/publish.yml   # 推 v* tag 时发布到 npm（OIDC 可信发布）
+├── .nojekyll             # GitHub Pages：禁用 Jekyll，否则 js/_via*.js 会被排除
 ├── Dockerfile / docker-compose.yml
 └── LICENSE
 ```
@@ -98,7 +139,7 @@ docker compose up -d
 建议使用最新版 Chrome / Edge / Firefox / Safari。视频与音频标注依赖
 `<video>`/`<audio>`、Canvas 与 Web Audio，较旧的浏览器可能无法完整支持。
 
-## License
+## 致谢与 License
 
 [BSD-2-Clause](LICENSE)。基于 VIA 3.0.13 汉化与改造，原版权归
 [Abhishek Dutta / Visual Geometry Group, Oxford University](https://www.robots.ox.ac.uk/~vgg/software/via/) 所有。
