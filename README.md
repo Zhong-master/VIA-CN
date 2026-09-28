@@ -74,6 +74,12 @@ https://unpkg.com/via-cn@3.0.13/via_image.html
 > 因此不能 `import { ... } from 'via-cn'`，只适合当作静态资源使用。
 > 另外 localStorage 按**源**隔离，用 CDN 域名打开时数据存在该 CDN 源下。
 
+## 发布到 npm（维护者）
+
+发布由 GitHub Actions 走 npm **Trusted Publishing (OIDC)** 完成，无需长期令牌；
+首次发布必须先手动 bootstrap 一次（npm 只允许对已存在的包配置可信发布）。
+完整步骤、排错表与安全提示见 [`PUBLISHING.md`](PUBLISHING.md)。
+
 ## 数据说明
 
 - 标注数据自动保存在**浏览器 localStorage**，并按标注器类型分别存储
@@ -96,6 +102,8 @@ https://unpkg.com/via-cn@3.0.13/via_image.html
 ├── bin/serve.js          # npx via-cn 的零依赖静态服务器
 ├── index.js              # npm 入口（导出资源目录路径）
 ├── package.json          # npm 包定义（files 白名单）
+├── PUBLISHING.md         # 维护者发布说明（OIDC 可信发布）
+├── .github/workflows/publish.yml  # 推 v* tag 自动发布
 ├── Dockerfile
 ├── docker-compose.yml
 └── LICENSE
