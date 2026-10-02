@@ -4,6 +4,12 @@
 
 **[▶ 在线演示](https://zhong-master.github.io/VIA-CN/)** · [BSD-2-Clause](LICENSE)
 
+[![npm version](https://img.shields.io/npm/v/via-cn?color=0090ff&label=npm)](https://www.npmjs.com/package/via-cn)
+[![license](https://img.shields.io/npm/l/via-cn?color=8e4ec6)](LICENSE)
+[![GitHub Pages](https://img.shields.io/badge/demo-online-0090ff)](https://zhong-master.github.io/VIA-CN/)
+
+> **一行命令即可运行**：`npx via-cn`
+
 ![VIA-CN 图片标注器](https://raw.githubusercontent.com/Zhong-master/VIA-CN/main/docs/screenshots/image-annotator.png)
 
 > **非官方分支**：本仓库是 VIA 的第三方中文汉化与改造版，与原项目及其作者无隶属关系。
@@ -71,10 +77,19 @@ node bin/serve.js -p 9000          # 指定端口；端口被占用时自动 +1 
 node bin/serve.js --host 0.0.0.0   # 允许局域网内其他机器访问
 ```
 
-本仓库同时按 npm 包规范组织（`name: via-cn`），发布到 npm 后可直接：
+本仓库已发布到 npm（[`via-cn`](https://www.npmjs.com/package/via-cn)），无需克隆即可一条命令启动：
 
 ```bash
-npx via-cn
+npx via-cn                        # http://127.0.0.1:8602/
+npx via-cn -p 9000                # 指定端口；端口被占用时自动 +1 重试
+npx via-cn --host 0.0.0.0         # 允许局域网内其他机器访问
+```
+
+也可以全局安装后直接使用：
+
+```bash
+npm install -g via-cn
+via-cn
 ```
 
 ### 方式二：任意静态服务器
