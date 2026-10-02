@@ -1,6 +1,6 @@
 {
   "name": "via-cn",
-  "version": "3.0.13",
+  "version": "3.0.14",
   "description": "VGG Image Annotator (VIA) 3.0.13 的非官方中文版：图片 / 视频 / 音频 / 成对比较标注工具，纯静态、零依赖",
   "keywords": [
     "via",
